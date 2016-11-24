@@ -24,7 +24,10 @@ import ReactiveDict from './ReactiveDict';
 
 import User from './user/User';
 import Accounts from './user/Accounts';
-
+let React = require('react-native');
+let {
+    AsyncStorage
+    } = React;
 
 module.exports = {
   composeWithTracker,
@@ -136,6 +139,9 @@ module.exports = {
         Data.db.addCollection(message.collection)
       }
       Data.db[message.collection].upsert({_id: message.id, ...message.fields});
+
+      let key = message.id+'_'+message.collection
+      AsyncStorage.setItem(key, JSON.stringify({_id: message.id, ...message.fields}))
     });
 
     Data.ddp.on("ready", message => {

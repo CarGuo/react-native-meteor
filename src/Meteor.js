@@ -1,5 +1,5 @@
 
-import { NetInfo, Platform, View } from 'react-native';
+import { NetInfo, Platform, View ,AsyncStorage} from 'react-native';
 
 import reactMixin from 'react-mixin';
 import Trackr from 'trackr';
@@ -24,10 +24,6 @@ import ReactiveDict from './ReactiveDict';
 
 import User from './user/User';
 import Accounts from './user/Accounts';
-let React = require('react-native');
-let {
-    AsyncStorage
-    } = React;
 
 module.exports = {
   composeWithTracker,
@@ -100,9 +96,23 @@ module.exports = {
       ...options
     });
 
-    NetInfo.isConnected.addEventListener('change', isConnected=>{
+    NetInfo.isConnected.addEventListener('change', async isConnected=>{
       if(isConnected && Data.ddp.autoReconnect) {
         Data.ddp.connect();
+      }
+
+      if(!isConnected) {
+        var keys = await AsyncStorage.getAllKeys()
+        keys.forEach(async function(key) {
+          let item = await AsyncStorage.getItem(key)
+          item = JSON.parse(item)
+          let cn = key.split('_')
+          item['_id'] = cn[0];
+          if(!Data.db[cn[1]]) {
+            Data.db.addCollection(cn[1])
+          }
+          Data.db[cn[1]].upsert(item);
+        })
       }
     });
 

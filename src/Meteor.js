@@ -177,6 +177,8 @@ module.exports = {
 
     Data.ddp.on("removed", message => {
       Data.db[message.collection] && Data.db[message.collection].del(message.id);
+      let key = message.id+'_'+message.collection
+      AsyncStorage.removeItem(key)
     });
     Data.ddp.on("result", message => {
       const call = Data.calls.find(call=>call.id==message.id);

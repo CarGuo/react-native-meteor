@@ -1,5 +1,6 @@
 import Data from './Data';
 import Random from '../lib/Random';
+import { AsyncStorage} from 'react-native';
 
 export default function(name) {
   const Meteor = this;
@@ -44,8 +45,10 @@ export default function(name) {
 
       if(Data.db[name].get(id)) return callback({error: 409, reason: "Duplicate key _id with value "+id});
 
-
       Data.db[name].upsert(item);
+
+      let key = id+'_'+name
+      AsyncStorage.setItem(key, JSON.stringify(item))
 
       Meteor.waitDdpConnected(()=>{
         Meteor.call('/'+name+'/insert', item, err => {
@@ -85,6 +88,9 @@ export default function(name) {
       const element = this.findOne(id);
       if(element) {
         Data.db[name].del(element._id);
+
+        let key = id+'_'+name
+        AsyncStorage.removeItem(key)
 
         Meteor.waitDdpConnected(()=>{
           Meteor.call('/'+name+'/remove', {_id: id}, (err, res) => {

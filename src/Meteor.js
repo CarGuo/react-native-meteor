@@ -106,7 +106,7 @@ module.exports = {
         keys.forEach(async function(key) {
           let item = await AsyncStorage.getItem(key)
           item = JSON.parse(item)
-          let cn = key.split('_')
+          let cn = key.split('&')
           item['_id'] = cn[0];
           if(!Data.db[cn[1]]) {
             Data.db.addCollection(cn[1])
@@ -150,7 +150,7 @@ module.exports = {
       }
       Data.db[message.collection].upsert({_id: message.id, ...message.fields});
 
-      let key = message.id+'_'+message.collection
+      let key = message.id+'&'+message.collection
       AsyncStorage.setItem(key, JSON.stringify({_id: message.id, ...message.fields}))
     });
 
@@ -177,7 +177,7 @@ module.exports = {
 
     Data.ddp.on("removed", message => {
       Data.db[message.collection] && Data.db[message.collection].del(message.id);
-      let key = message.id+'_'+message.collection
+      let key = message.id+'&'+message.collection
       AsyncStorage.removeItem(key)
     });
     Data.ddp.on("result", message => {

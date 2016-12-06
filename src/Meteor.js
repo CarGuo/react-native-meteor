@@ -82,6 +82,22 @@ module.exports = {
   reconnect() {
     Data.ddp && Data.ddp.connect();
   },
+  async offline(){
+    let isConnected = await NetInfo.isConnected.fetch()
+    if(!isConnected) {
+      var keys = await AsyncStorage.getAllKeys()
+      keys.forEach(async function(key) {
+        let item = await AsyncStorage.getItem(key)
+        item = JSON.parse(item)
+        let cn = key.split('&')
+        item['_id'] = cn[0];
+        if(!Data.db[cn[1]]) {
+          Data.db.addCollection(cn[1])
+        }
+        Data.db[cn[1]].upsert(item);
+      })
+    }
+  },
   connect(endpoint, options) {
     if(!endpoint) endpoint = Data._endpoint;
     if(!options) options = Data._options;
